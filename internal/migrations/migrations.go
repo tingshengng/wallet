@@ -12,14 +12,38 @@ func NewMigrator(db *gorm.DB) *gormigrate.Gormigrate {
 		{
 			ID: "20250611211100",
 			Migrate: func(tx *gorm.DB) error {
-				// Create tests table
-				if err := tx.AutoMigrate(&models.Test{}); err != nil {
+				// Create users table
+				if err := tx.AutoMigrate(&models.User{}); err != nil {
+					return err
+				}
+
+				// Create user_tokens table
+				if err := tx.AutoMigrate(&models.UserToken{}); err != nil {
+					return err
+				}
+
+				// Create wallets table
+				if err := tx.AutoMigrate(&models.Wallet{}); err != nil {
+					return err
+				}
+
+				// Create transactions table
+				if err := tx.AutoMigrate(&models.Transaction{}); err != nil {
 					return err
 				}
 				return nil
 			},
 			Rollback: func(tx *gorm.DB) error {
-				if err := tx.Migrator().DropTable("tests"); err != nil {
+				if err := tx.Migrator().DropTable("transactions"); err != nil {
+					return err
+				}
+				if err := tx.Migrator().DropTable("wallets"); err != nil {
+					return err
+				}
+				if err := tx.Migrator().DropTable("user_tokens"); err != nil {
+					return err
+				}
+				if err := tx.Migrator().DropTable("users"); err != nil {
 					return err
 				}
 				return nil

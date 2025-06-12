@@ -4,13 +4,16 @@ import (
 	"log"
 	"os"
 
-	"wallet/internal/database"
-	"wallet/internal/migrations"
-	"wallet/internal/models"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+
+	"wallet/internal/cache"
+	"wallet/internal/database"
+	"wallet/internal/handlers"
+	"wallet/internal/middleware"
+	"wallet/internal/migrations"
+	"wallet/internal/repositories"
+	"wallet/internal/services"
 )
 
 func main() {
@@ -29,51 +32,49 @@ func main() {
 		log.Fatal(err)
 	}
 
-	app := fiber.New()
+	// Initialize repositories
+	userRepo := repositories.NewUserRepository(db)
+	userTokenRepo := repositories.NewUserTokenRepository(db)
+	walletRepo := repositories.NewWalletRepository(db)
+	transactionRepo := repositories.NewTransactionRepository(db)
 
-	// POST /api/tests
-	app.Post("/api/tests", func(c *fiber.Ctx) error {
-		var test models.Test
-		if err := c.BodyParser(&test); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid request body",
-			})
-		}
+	// Initialize cache
+	cache := cache.NewInMemoryCache()
 
-		if test.Name == "" {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Name is required",
-			})
-		}
-		test.UUID = uuid.New().String()
+	// Initialize service
+	service := services.NewWalletService(walletRepo, transactionRepo, cache)
 
-		if err := db.Create(&test).Error; err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": err.Error(),
-			})
-		}
+	// Initialize handlers
+	userHandler := handlers.NewUserHandler(userRepo, userTokenRepo, walletRepo)
+	walletHandler := handlers.NewWalletHandler(service)
 
-		return c.Status(fiber.StatusCreated).JSON(test)
-	})
+	// Initialize middleware
+	authMiddleware := middleware.NewAuthMiddleware(userTokenRepo, userRepo)
 
-	// GET /api/tests
-	app.Get("/api/tests", func(c *fiber.Ctx) error {
-		var tests []models.Test
-		if err := db.Find(&tests).Error; err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": err.Error(),
-			})
-		}
+	// Initialize Gin router
+	r := gin.Default()
 
-		return c.JSON(tests)
-	})
+	// Public routes
+	public := r.Group("/api")
+	public.POST("/login", userHandler.Login)
+
+	// Protected routes
+	protected := r.Group("/api")
+	protected.Use(authMiddleware.AuthMiddleware())
+	{
+		protected.POST("/deposit", walletHandler.Deposit)
+		protected.POST("/withdraw", walletHandler.Withdraw)
+		protected.POST("/transfer", walletHandler.Transfer)
+		protected.GET("/balance", walletHandler.GetBalance)
+		protected.GET("/transactions", walletHandler.GetTransactionHistory)
+	}
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8888"
 	}
 
-	if err := app.Listen(":" + port); err != nil {
+	if err := r.Run(":" + port); err != nil {
 		log.Fatal(err)
 	}
 }
