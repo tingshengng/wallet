@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type WalletService struct {
+type walletService struct {
 	WalletRepo      repositories.WalletRepository
 	TransactionRepo repositories.TransactionRepository
 	Cache           cache.Cache
@@ -20,15 +20,15 @@ func NewWalletService(
 	walletRepo repositories.WalletRepository,
 	transactionRepo repositories.TransactionRepository,
 	cache cache.Cache,
-) *WalletService {
-	return &WalletService{
+) WalletService {
+	return &walletService{
 		WalletRepo:      walletRepo,
 		TransactionRepo: transactionRepo,
 		Cache:           cache,
 	}
 }
 
-func (s *WalletService) Deposit(userID string, amount float64) (float64, *APIError) {
+func (s *walletService) Deposit(userID string, amount float64) (float64, *APIError) {
 	if amount <= 0 {
 		return 0, NewBadRequestError("Invalid amount")
 	}
@@ -65,7 +65,7 @@ func (s *WalletService) Deposit(userID string, amount float64) (float64, *APIErr
 	return wallet.Balance, nil
 }
 
-func (s *WalletService) Withdraw(userID string, amount float64) (float64, *APIError) {
+func (s *walletService) Withdraw(userID string, amount float64) (float64, *APIError) {
 	if amount <= 0 {
 		return 0, NewBadRequestError("Invalid amount")
 	}
@@ -106,7 +106,7 @@ func (s *WalletService) Withdraw(userID string, amount float64) (float64, *APIEr
 	return wallet.Balance, nil
 }
 
-func (s *WalletService) Transfer(fromUserID, toUserID string, amount float64) (float64, *APIError) {
+func (s *walletService) Transfer(fromUserID, toUserID string, amount float64) (float64, *APIError) {
 	if amount <= 0 {
 		return 0, NewBadRequestError("Invalid amount")
 	}
@@ -162,7 +162,7 @@ func (s *WalletService) Transfer(fromUserID, toUserID string, amount float64) (f
 	return fromWallet.Balance, nil
 }
 
-func (s *WalletService) GetBalance(userID string) (float64, *APIError) {
+func (s *walletService) GetBalance(userID string) (float64, *APIError) {
 	wallet, err := s.WalletRepo.FindByUserID(userID)
 	if err != nil {
 		return 0, NewInternalServerError("Failed to get wallet")
@@ -170,7 +170,7 @@ func (s *WalletService) GetBalance(userID string) (float64, *APIError) {
 	return wallet.Balance, nil
 }
 
-func (s *WalletService) GetTransactionHistory(userID string, page, pageSize int, transactionType, status string) ([]models.Transaction, *APIError) {
+func (s *walletService) GetTransactionHistory(userID string, page, pageSize int, transactionType, status string) ([]models.Transaction, *APIError) {
 	if page <= 0 {
 		page = 1
 	}

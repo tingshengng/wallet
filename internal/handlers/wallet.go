@@ -9,7 +9,7 @@ import (
 )
 
 type WalletHandler struct {
-	WalletService *services.WalletService
+	WalletService services.WalletService
 }
 
 // DepositRequest represents the request body for deposit endpoint
@@ -51,7 +51,7 @@ type TransactionHistoryResponse struct {
 	Transactions []models.Transaction `json:"transactions"`
 }
 
-func NewWalletHandler(walletService *services.WalletService) *WalletHandler {
+func NewWalletHandler(walletService services.WalletService) *WalletHandler {
 	return &WalletHandler{
 		WalletService: walletService,
 	}
