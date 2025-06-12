@@ -3,32 +3,27 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"wallet/internal/models"
 	"wallet/internal/services"
+
+	"github.com/gin-gonic/gin"
 )
 
 type WalletHandler struct {
 	WalletService services.WalletService
 }
 
-// DepositRequest represents the request body for deposit endpoint
 type DepositRequest struct {
 	Amount float64 `json:"amount"`
 }
-
-// WithdrawRequest represents the request body for withdraw endpoint
 type WithdrawRequest struct {
 	Amount float64 `json:"amount"`
 }
-
-// TransferRequest represents the request body for transfer endpoint
 type TransferRequest struct {
 	ToUserID string  `json:"to_user_id"`
 	Amount   float64 `json:"amount"`
 }
 
-// TransactionHistoryRequest represents the request parameters for transaction history endpoint
 type TransactionHistoryRequest struct {
 	Page     int    `form:"page"`
 	PageSize int    `form:"page_size"`
@@ -36,17 +31,14 @@ type TransactionHistoryRequest struct {
 	Status   string `form:"status"`
 }
 
-// BalanceResponse represents the response body for balance endpoint
 type BalanceResponse struct {
 	Balance float64 `json:"balance"`
 }
 
-// TransactionResponse represents the response body for transaction endpoints
 type TransactionResponse struct {
 	Balance float64 `json:"balance"`
 }
 
-// TransactionHistoryResponse represents the response body for transaction history endpoint
 type TransactionHistoryResponse struct {
 	Transactions []models.Transaction `json:"transactions"`
 }

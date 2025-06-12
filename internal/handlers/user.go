@@ -19,13 +19,11 @@ type UserHandler struct {
 	WalletRepo    repositories.WalletRepository
 }
 
-// LoginRequest represents the request body for login endpoint
 type LoginRequest struct {
 	Email string `json:"email"`
 	Name  string `json:"name"`
 }
 
-// LoginResponse represents the response body for login endpoint
 type LoginResponse struct {
 	Token string `json:"token"`
 }

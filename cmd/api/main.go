@@ -32,26 +32,18 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Initialize repositories
 	userRepo := repositories.NewUserRepository(db)
 	userTokenRepo := repositories.NewUserTokenRepository(db)
 	walletRepo := repositories.NewWalletRepository(db)
 	transactionRepo := repositories.NewTransactionRepository(db)
-
-	// Initialize cache
 	cache := cache.NewInMemoryCache()
 
-	// Initialize service
 	service := services.NewWalletService(walletRepo, transactionRepo, cache)
 
-	// Initialize handlers
 	userHandler := handlers.NewUserHandler(userRepo, userTokenRepo, walletRepo)
 	walletHandler := handlers.NewWalletHandler(service)
-
-	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(userTokenRepo, userRepo)
 
-	// Initialize Gin router
 	r := gin.Default()
 
 	// Public routes

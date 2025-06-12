@@ -1,0 +1,10 @@
+pkg/
+bin/
+
+.idea/
+.vscode/
+.DS_Store
+
+coverage.txt
+*.log
+*.env

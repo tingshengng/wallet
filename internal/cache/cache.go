@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/patrickmn/go-cache"
@@ -20,10 +19,8 @@ func NewInMemoryCache() *InMemoryCache {
 func (c *InMemoryCache) Get(key string) (interface{}, bool) {
 	value, found := c.cache.Get(key)
 	if !found {
-		fmt.Println("Cache misssssss:", key)
 		return nil, false
 	}
-	fmt.Println("Cache hit for key:", key)
 	return value, true
 }
 

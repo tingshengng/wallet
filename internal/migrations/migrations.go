@@ -12,22 +12,18 @@ func NewMigrator(db *gorm.DB) *gormigrate.Gormigrate {
 		{
 			ID: "20250611211100",
 			Migrate: func(tx *gorm.DB) error {
-				// Create users table
 				if err := tx.AutoMigrate(&models.User{}); err != nil {
 					return err
 				}
 
-				// Create user_tokens table
 				if err := tx.AutoMigrate(&models.UserToken{}); err != nil {
 					return err
 				}
 
-				// Create wallets table
 				if err := tx.AutoMigrate(&models.Wallet{}); err != nil {
 					return err
 				}
 
-				// Create transactions table
 				if err := tx.AutoMigrate(&models.Transaction{}); err != nil {
 					return err
 				}
