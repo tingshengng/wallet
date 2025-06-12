@@ -192,7 +192,7 @@ func (s *walletService) GetTransactionHistory(userID string, page, pageSize int,
 
 	// Cache the results for page=1 and pageSize=10
 	if page == 1 && pageSize == 10 && transactionType == "" && status == "" {
-		s.Cache.Set(userID, transactions, 5*time.Minute)
+		s.Cache.Set(userID, transactions, 60*time.Minute)
 	}
 
 	return transactions, nil

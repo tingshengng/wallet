@@ -1,9 +1,18 @@
 # Starting the service locally
-1. Start postgres
+1. Add an .env file, sample .env for local development
+```bash
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=wallet_db
+DB_SSLMODE=disable
+```
+2. Start postgres
 ```bash
 make pg-up
 ```
-2. Start the service
+3. Start the wallet service
 ```bash
 make up
 ```
@@ -23,7 +32,7 @@ make up
 - `internal/models`: Defines the data models used by the service.
 - `internal/handlers`: Contains the API handlers.
 - `internal/middleware`: Handles authentication logic before requests reach the handlers.
-- `internal/services`: The business logic layer
+- `internal/services`: The business logic layer, this is where the main logic of the wallet service is implemented.
 - `internal/repositories`: Provides the database access layer.
 - `internal/cache`: Contains the cache implementation
 
@@ -105,6 +114,3 @@ curl --location '{baseUrl}/api/balance' \
 curl --location '{baseUrl}/api/transactions?type=deposit' \
 --header 'Authorization: Bearer {token-from-login-response}'
 ```
-
-
-

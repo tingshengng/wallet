@@ -12,7 +12,7 @@ type InMemoryCache struct {
 
 func NewInMemoryCache() *InMemoryCache {
 	return &InMemoryCache{
-		cache: cache.New(5*time.Minute, 10*time.Minute), // Default cleanup interval and item expiration
+		cache: cache.New(60*time.Minute, 60*time.Minute), // Default cleanup interval and item expiration
 	}
 }
 
