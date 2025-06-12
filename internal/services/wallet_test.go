@@ -163,13 +163,21 @@ func TestWalletService_Withdraw(t *testing.T) {
 		userID := "user123"
 		amount := 100.0
 		newBalance, _ := walletService.Withdraw(userID, amount)
-		assert.Equal(t, float64(0.0), newBalance) // 100.0 (initial) + 100.0 (deposit)
+		assert.Equal(t, float64(0.0), newBalance)
 	}
 
 	// Test case: Insufficient balance
 	{
 		userID := "user123"
 		amount := 150.0
+		_, err := walletService.Withdraw(userID, amount)
+		assert.Error(t, err)
+	}
+
+	// Test case: Wallet not found
+	{
+		userID := "user456"
+		amount := 50.0
 		_, err := walletService.Withdraw(userID, amount)
 		assert.Error(t, err)
 	}
