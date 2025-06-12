@@ -55,7 +55,7 @@ go test ./... -v
 
 **Login**
 ```bash
-curl --location 'http://localhost:8888/api/login' \
+curl --location '{baseUrl}/api/login' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "email": "satoshi@gmail.com",
@@ -65,7 +65,7 @@ curl --location 'http://localhost:8888/api/login' \
 
 **Deposit**
 ```bash
-curl --location 'http://localhost:8888/api/deposit' \
+curl --location '{baseUrl}/api/deposit' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer {token-from-login-response}' \
 --data '{
@@ -75,7 +75,7 @@ curl --location 'http://localhost:8888/api/deposit' \
 
 **Withdraw**
 ```bash
-curl --location 'http://localhost:8888/api/withdraw' \
+curl --location '{baseUrl}/api/withdraw' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer {token-from-login-response}' \
 --data '{
@@ -85,7 +85,7 @@ curl --location 'http://localhost:8888/api/withdraw' \
 
 **Transfer**
 ```bash
-curl --location 'http://localhost:8888/api/transfer' \
+curl --location '{baseUrl}/api/transfer' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer {token-from-login-response}' \
 --data '{
@@ -96,13 +96,13 @@ curl --location 'http://localhost:8888/api/transfer' \
 
 **Get Balance**
 ```bash
-curl --location 'http://localhost:8888/api/balance' \
+curl --location '{baseUrl}/api/balance' \
 --header 'Authorization: Bearer {token-from-login-response}'
 ```
 
 **Get Transaction History**
 ```bash
-curl --location 'http://localhost:8888/api/transactions?type=deposit' \
+curl --location '{baseUrl}/api/transactions?type=deposit' \
 --header 'Authorization: Bearer {token-from-login-response}'
 ```
 
