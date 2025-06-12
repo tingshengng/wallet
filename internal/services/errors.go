@@ -7,6 +7,10 @@ type APIError struct {
 	Message string
 }
 
+func (e *APIError) Error() string {
+	return e.Message
+}
+
 func NewAPIError(code int, msg string) *APIError {
 	return &APIError{
 		Code:    code,
