@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"wallet/internal/models"
+
 	"gorm.io/gorm"
 )
 
@@ -30,5 +31,18 @@ func (r *walletRepository) Update(wallet *models.Wallet) error {
 }
 
 func (r *walletRepository) Delete(id string) error {
-	return r.db.Delete(&models.Wallet{}, id).Error
+	return r.db.Delete(&models.Wallet{}, "id = ?", id).Error
+}
+
+func (r *walletRepository) WithTx(tx interface{}) WalletRepository {
+	txDB, ok := tx.(*gorm.DB)
+	if !ok {
+		return r
+	}
+	return &walletRepository{db: txDB}
+}
+
+// DB returns the underlying GORM DB instance
+func (r *walletRepository) DB() *gorm.DB {
+	return r.db
 }

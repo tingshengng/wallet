@@ -2,6 +2,8 @@ package repositories
 
 import (
 	"wallet/internal/models"
+
+	"gorm.io/gorm"
 )
 
 // MockWalletRepository is a mock implementation of WalletRepository
@@ -13,6 +15,22 @@ type MockWalletRepository struct {
 	UpdateFunc       func(wallet *models.Wallet) error
 	CreateFunc       func(wallet *models.Wallet) error
 	DeleteFunc       func(id string) error
+	WithTxFunc       func(tx interface{}) WalletRepository
+	DBFunc           func() *gorm.DB
+}
+
+func (m *MockWalletRepository) DB() *gorm.DB {
+	if m.DBFunc != nil {
+		return m.DBFunc()
+	}
+	return nil
+}
+
+func (m *MockWalletRepository) WithTx(tx interface{}) WalletRepository {
+	if m.WithTxFunc != nil {
+		return m.WithTxFunc(tx)
+	}
+	return m
 }
 
 func (m *MockWalletRepository) Delete(id string) error {
@@ -46,9 +64,17 @@ func (m *MockWalletRepository) Create(wallet *models.Wallet) error {
 // MockTransactionRepository is a mock implementation of TransactionRepository
 type MockTransactionRepository struct {
 	TransactionRepository
-	CreateFunc func(transaction *models.Transaction) error
-	FindFunc   func(userID string, page, pageSize int, transactionType, status string) ([]models.Transaction, error)
-	DeleteFunc func(id string) error
+	CreateFunc       func(transaction *models.Transaction) error
+	FindByUserIDFunc func(userID string, page, pageSize int, transactionType, status string) ([]models.Transaction, error)
+	DeleteFunc       func(id string) error
+	WithTxFunc       func(tx interface{}) TransactionRepository
+}
+
+func (m *MockTransactionRepository) WithTx(tx interface{}) TransactionRepository {
+	if m.WithTxFunc != nil {
+		return m.WithTxFunc(tx)
+	}
+	return m
 }
 
 func (m *MockTransactionRepository) Create(transaction *models.Transaction) error {
@@ -58,9 +84,9 @@ func (m *MockTransactionRepository) Create(transaction *models.Transaction) erro
 	return nil
 }
 
-func (m *MockTransactionRepository) Find(userID string, page, pageSize int, transactionType, status string) ([]models.Transaction, error) {
-	if m.FindFunc != nil {
-		return m.FindFunc(userID, page, pageSize, transactionType, status)
+func (m *MockTransactionRepository) FindByUserID(userID string, page, pageSize int, transactionType, status string) ([]models.Transaction, error) {
+	if m.FindByUserIDFunc != nil {
+		return m.FindByUserIDFunc(userID, page, pageSize, transactionType, status)
 	}
 	return nil, nil
 }

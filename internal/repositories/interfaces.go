@@ -2,6 +2,8 @@ package repositories
 
 import (
 	"wallet/internal/models"
+
+	"gorm.io/gorm"
 )
 
 type UserRepository interface {
@@ -25,6 +27,8 @@ type WalletRepository interface {
 	FindByUserID(userID string) (*models.Wallet, error)
 	Update(wallet *models.Wallet) error
 	Delete(id string) error
+	WithTx(tx interface{}) WalletRepository
+	DB() *gorm.DB
 }
 
 type TransactionRepository interface {
@@ -32,4 +36,5 @@ type TransactionRepository interface {
 	FindByUserID(userID string, page, pageSize int, transactionType, status string) ([]models.Transaction, error)
 	Update(transaction *models.Transaction) error
 	Delete(id string) error
+	WithTx(tx interface{}) TransactionRepository
 }

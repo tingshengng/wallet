@@ -38,6 +38,22 @@ func (s *walletService) Deposit(userID string, amount float64) (float64, *APIErr
 		return 0, NewInternalServerError("Failed to get wallet")
 	}
 
+	// Start a database transaction for the create and update operations
+	tx := s.WalletRepo.DB().Begin()
+	if tx.Error != nil {
+		return 0, NewInternalServerError("Failed to start transaction")
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Create repository instances with transaction
+	walletRepo := s.WalletRepo.WithTx(tx)
+	transactionRepo := s.TransactionRepo.WithTx(tx)
+
 	// Create transaction
 	transaction := &models.Transaction{
 		ID:         uuid.New().String(),
@@ -50,15 +66,23 @@ func (s *walletService) Deposit(userID string, amount float64) (float64, *APIErr
 		UpdatedAt:  time.Now(),
 	}
 
-	if err := s.TransactionRepo.Create(transaction); err != nil {
+	if err := transactionRepo.Create(transaction); err != nil {
+		tx.Rollback()
 		return 0, NewInternalServerError("Failed to create transaction")
 	}
 
 	// Update wallet balance
 	wallet.Balance += amount
 	wallet.UpdatedAt = time.Now()
-	if err := s.WalletRepo.Update(wallet); err != nil {
+	if err := walletRepo.Update(wallet); err != nil {
+		tx.Rollback()
 		return 0, NewInternalServerError("Failed to update wallet")
+	}
+
+	// Commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return 0, NewInternalServerError("Failed to commit transaction")
 	}
 
 	s.Cache.Delete(userID)
@@ -79,6 +103,22 @@ func (s *walletService) Withdraw(userID string, amount float64) (float64, *APIEr
 		return 0, NewBadRequestError("Insufficient balance")
 	}
 
+	// Start a database transaction for the create and update operations
+	tx := s.WalletRepo.DB().Begin()
+	if tx.Error != nil {
+		return 0, NewInternalServerError("Failed to start transaction")
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Create repository instances with transaction
+	walletRepo := s.WalletRepo.WithTx(tx)
+	transactionRepo := s.TransactionRepo.WithTx(tx)
+
 	// Create transaction
 	transaction := &models.Transaction{
 		ID:         uuid.New().String(),
@@ -91,15 +131,23 @@ func (s *walletService) Withdraw(userID string, amount float64) (float64, *APIEr
 		UpdatedAt:  time.Now(),
 	}
 
-	if err := s.TransactionRepo.Create(transaction); err != nil {
+	if err := transactionRepo.Create(transaction); err != nil {
+		tx.Rollback()
 		return 0, NewInternalServerError("Failed to create transaction")
 	}
 
 	// Update wallet balance
 	wallet.Balance -= amount
 	wallet.UpdatedAt = time.Now()
-	if err := s.WalletRepo.Update(wallet); err != nil {
+	if err := walletRepo.Update(wallet); err != nil {
+		tx.Rollback()
 		return 0, NewInternalServerError("Failed to update wallet")
+	}
+
+	// Commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return 0, NewInternalServerError("Failed to commit transaction")
 	}
 
 	s.Cache.Delete(userID)
@@ -127,6 +175,22 @@ func (s *walletService) Transfer(fromUserID, toUserID string, amount float64) (f
 		return 0, NewBadRequestError("Insufficient balance")
 	}
 
+	// Start a database transaction
+	tx := s.WalletRepo.DB().Begin()
+	if tx.Error != nil {
+		return 0, NewInternalServerError("Failed to start transaction")
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Create repository instances with transaction
+	walletRepo := s.WalletRepo.WithTx(tx)
+	transactionRepo := s.TransactionRepo.WithTx(tx)
+
 	// Create transaction
 	transaction := &models.Transaction{
 		ID:         uuid.New().String(),
@@ -139,22 +203,31 @@ func (s *walletService) Transfer(fromUserID, toUserID string, amount float64) (f
 		UpdatedAt:  time.Now(),
 	}
 
-	if err := s.TransactionRepo.Create(transaction); err != nil {
+	if err := transactionRepo.Create(transaction); err != nil {
+		tx.Rollback()
 		return 0, NewInternalServerError("Failed to create transaction")
 	}
 
 	// Update sender's wallet
 	fromWallet.Balance -= amount
 	fromWallet.UpdatedAt = time.Now()
-	if err := s.WalletRepo.Update(fromWallet); err != nil {
+	if err := walletRepo.Update(fromWallet); err != nil {
+		tx.Rollback()
 		return 0, NewInternalServerError("Failed to update sender's wallet")
 	}
 
 	// Update recipient's wallet
 	toWallet.Balance += amount
 	toWallet.UpdatedAt = time.Now()
-	if err := s.WalletRepo.Update(toWallet); err != nil {
+	if err := walletRepo.Update(toWallet); err != nil {
+		tx.Rollback()
 		return 0, NewInternalServerError("Failed to update recipient's wallet")
+	}
+
+	// Commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return 0, NewInternalServerError("Failed to commit transaction")
 	}
 
 	s.Cache.Delete(fromUserID)
